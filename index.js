@@ -23,6 +23,7 @@ const mouseEventTypes = {
 }
 
 let mouseLeftPressed
+let mouseRightPressed
 let mouseX
 let isPickedStartNode
 let isPickedEndNode
@@ -32,6 +33,7 @@ let grid
 
 function init(){
     mouseLeftPressed = false
+    mouseRightPressed = false
     mouseX = 1
     mouseY = 1
     isPickedStartNode = false
@@ -58,6 +60,7 @@ document.oncontextmenu = (e) => {
 document.addEventListener("mousedown", (e) => {
     if(e.which === mouseEventTypes.RIGHT){
         // right click
+        mouseRightPressed = true
     }
     if(e.which === mouseEventTypes.LEFT){
         // left click
@@ -160,7 +163,7 @@ function draw(){
 }
 
 function update(){
-    if(mouseLeftPressed === true){
+    if(mouseLeftPressed === true || mouseRightPressed === true){
         for(let row = 0; row < rows; row++){
             for(let col = 0; col < cols; col++){
                 const startX = col * oneWidth
@@ -173,26 +176,33 @@ function update(){
                     mouseY >= startY &&
                     mouseY < endY
                 ){
-                    if(isPickedStartNode === true){
-                        grid[row][col].type = gridTypes.START
-                        mouseLeftPressed = false
-                        isPickedStartNode = false
-                    } else if(isPickedEndNode === true){
-                        grid[row][col].type = gridTypes.END
-                        mouseLeftPressed = false
-                        isPickedEndNode = false
-                    } else {
-                        const { type } = grid[row][col]
-                        if(type === gridTypes.START){
+                    if(mouseRightPressed){
+                        if(grid[row][col].type === gridTypes.WALL){
                             grid[row][col].type = gridTypes.NULL
-                            isPickedStartNode = true
+                        }
+                    }
+                    if(mouseLeftPressed){
+                        if(isPickedStartNode === true){
+                            grid[row][col].type = gridTypes.START
                             mouseLeftPressed = false
-                        } else if(type === gridTypes.END){
-                            grid[row][col].type = gridTypes.NULL
-                            isPickedEndNode = true
-                            mouseLeftPressed = false   
+                            isPickedStartNode = false
+                        } else if(isPickedEndNode === true){
+                            grid[row][col].type = gridTypes.END
+                            mouseLeftPressed = false
+                            isPickedEndNode = false
                         } else {
-                            grid[row][col].type = gridTypes.WALL
+                            const { type } = grid[row][col]
+                            if(type === gridTypes.START){
+                                grid[row][col].type = gridTypes.NULL
+                                isPickedStartNode = true
+                                mouseLeftPressed = false
+                            } else if(type === gridTypes.END){
+                                grid[row][col].type = gridTypes.NULL
+                                isPickedEndNode = true
+                                mouseLeftPressed = false   
+                            } else {
+                                grid[row][col].type = gridTypes.WALL
+                            }
                         }
                     }
                 }
