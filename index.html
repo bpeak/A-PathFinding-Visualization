@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+        html, body{
+            height: 100%;
+            width: 100%;
+        }
+        .main{
+            display: flex;
+            flex-direction: row;
+            width: 100vw;
+            height: 100vh;
+        }
+        #myCanvas{
+            width: 90%;
+            height: 100%;
+        }
+        #btnStart{
+            color: white;
+            font-size: 1.3em;
+            padding: 1em;
+            font-weight: 600;
+            background-color: black;
+            border: none;
+            border-radius: 1em;
+            border: 1px solid grey;
+            box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2), 0 6px 20px 0 rgba(0,0,0,0.19); 
+            cursor: pointer;
+            transition: all;
+            transition-timing-function: ease;
+            transition-duration: 0.1s;
+        }
+        #btnStart:hover{
+            background-color:#0077CC;
+        }
+        .manual{
+            font-weight: 600;
+            padding: 1em;
+        }
+    </style>
+</head>
+<body>
+    <div class="main">
+        <canvas id="myCanvas"></canvas>
+        <div>
+            <div class="manual">
+                시작점(빨강)<br/>
+                도착점(파랑)<br/>
+                각각 클릭해서 원하는 위치에 옮긴뒤 Search 클릭
+            </div>
+            <button id="btnStart">Search</button>
+        </div>
+    </div>
+    <script src="index.js"></script>
+</body>
+</html>
