@@ -24,14 +24,18 @@ const mouseEventTypes = {
 
 let mouseLeftPressed
 let mouseRightPressed
+let mouseIn
 let mouseX
+let mouseY
 let isPickedStartNode
 let isPickedEndNode
-let mouseY
-
 let grid
+let speed
+let immediateView
+let restartSwitch = false
 
 function init(){
+    mouseIn = false
     mouseLeftPressed = false
     mouseRightPressed = false
     mouseX = 1
@@ -39,22 +43,56 @@ function init(){
     isPickedStartNode = false
     isPickedEndNode = false
     grid = createGrid(rows, cols)
+    speed = document.getElementById("myRange").value
+    immediateView = document.getElementById("myCheckBox").checked
 }
 
 init()
 
 grid[14][4].type = gridTypes.START
-let startNode = grid[0][0]
 grid[14][24].type = gridTypes.END
-let endNode = grid[19][19]
 
-myCanvas.addEventListener("mousemove", (e) => {
+document.getElementById("btnReset").addEventListener("click", () => {
+    restartSwitch = true
+    setTimeout(() => {
+        restartSwitch = false
+        resetGrid()
+    }, 100)
+})
+
+// document.getElementById("btnRestart").addEventListener("click", (e) => {
+//     restartSwitch = true
+//     recoverGrid()
+//     setTimeout(() => {
+//         restartSwitch = false
+//         solution()
+//     }, 100)
+
+// })
+
+document.getElementById("myCheckBox").addEventListener("input", (e) => {
+    immediateView = e.currentTarget.checked
+})
+
+document.getElementById("myRange").addEventListener("input", (e) =>{
+    speed = e.currentTarget.value
+})
+
+canvas.addEventListener("mousemove", (e) => {
     mouseX = e.offsetX
     mouseY = e.offsetY
 })
 
+canvas.addEventListener("mouseenter", () => {
+    mouseIn = true
+})
+
+canvas.addEventListener("mouseleave", () => {
+    mouseIn = false
+})
+
 document.oncontextmenu = (e) => {
-    e.preventDefault()
+    // e.preventDefault()
 }
 
 document.addEventListener("mousedown", (e) => {
@@ -75,6 +113,7 @@ document.addEventListener("mouseup", (e) => {
 })
 
 document.getElementById("btnStart").addEventListener("click", () => {
+    console.log(solution, '실행한다')
     solution()
 })
 
@@ -90,7 +129,7 @@ function draw(){
                 ctx.fillStyle = "white"
                 break
                 case gridTypes.START:
-                ctx.fillStyle = "#C30103"
+                ctx.fillStyle = "#C30103" 
                 break
                 case gridTypes.END:
                 ctx.fillStyle = "#0077CC"
@@ -163,7 +202,7 @@ function draw(){
 }
 
 function update(){
-    if(mouseLeftPressed === true || mouseRightPressed === true){
+    if(mouseIn && ( mouseLeftPressed === true || mouseRightPressed === true )){
         for(let row = 0; row < rows; row++){
             for(let col = 0; col < cols; col++){
                 const startX = col * oneWidth
@@ -220,27 +259,11 @@ function loop(){
 loop()
 
 async function solution(){
-    let startNode
-    let endNode
-    let breakSwitch = false
-    for(let row = 0; row < rows; row++){
-        if(breakSwitch === true){ break }
-        for(let col = 0; col < cols; col++){
-            if(startNode && endNode){
-                breakSwitch = true
-                break
-            }
-            if(grid[row][col].type === gridTypes.START){
-                startNode = grid[row][col]
-            } else if(grid[row][col].type === gridTypes.END){
-                endNode = grid[row][col]
-            }
-        }
-    }
-
+    const [startNode, endNode] = findStartAndEndNode()
     const openList = [startNode]
     for(let i = 0; true; i++){
-        await timer(2)
+        if(restartSwitch === true){ break }
+        if(immediateView === false){ await timer() }
         
         // endNode 찾음
         if(endNode.isVisited === true){
@@ -460,12 +483,31 @@ function findAdjacentNodes(currentNode){
     return adjacentNodes
 }
 
-function timer(ms){
+function timer(){
+    const delay = 200 - speed
     return new Promise((resolve) => {
         setTimeout(() => {
             resolve()
-        }, ms)
+        }, delay)
     })
+}
+
+function Node({
+    row,
+    col,
+    index,
+    type,
+}){
+    this.type = type
+    this.row = row
+    this.col = col
+    this.g = 0
+    this.h = 0
+    this.f = 0
+    this.index = index
+    this.isVisited = false
+    this.isClosed = false
+    this.parentIndex = null
 }
 
 function createGrid(rows, cols){
@@ -474,20 +516,81 @@ function createGrid(rows, cols){
     for(let row = 0; row < rows; row++){
         grid[row] = []
         for(let col = 0; col < cols; col++){
-            grid[row][col] = {
-                type : gridTypes.NULL,
+            grid[row][col] = new Node({
                 row,
                 col,
-                g : 00,
-                h : 00,
-                f : 00,
-                index : index,
-                isVisited : false,
-                isClosed : false,
-                parentIndex : null,
-            }
+                index,
+                type : gridTypes.NULL
+            })
             index ++
         }
     }
     return grid    
+}
+
+function resetGrid(){
+    for(let row = 0; row < grid.length; row++){
+        for(let col = 0; col < grid[0].length; col++){
+            const { type } = grid[row][col]
+            if(type === gridTypes.START || type === gridTypes.END){
+                grid[row][col] = new Node({
+                    row,
+                    col,
+                    index : grid[row][col].index,
+                    type : grid[row][col].type
+                })
+            } else {
+                grid[row][col] = new Node({
+                    row,
+                    col,
+                    index : grid[row][col].index,
+                    type : gridTypes.NULL
+                })
+            }
+        }
+    }  
+}
+
+function recoverGrid(){
+    for(let row = 0; row < grid.length; row++){
+        for(let col = 0; col < grid[0].length; col++){
+            const { type } = grid[row][col]
+            if(type === gridTypes.START || type === gridTypes.END || type === gridTypes.WALL){
+                grid[row][col] = new Node({
+                    row,
+                    col,
+                    index : grid[row][col].index,
+                    type : grid[row][col].type
+                })
+            } else {
+                grid[row][col] = new Node({
+                    row,
+                    col,
+                    index : grid[row][col].index,
+                    type : gridTypes.NULL
+                })
+            }
+        }
+    }    
+}
+
+function findStartAndEndNode(){
+    let startNode
+    let endNode
+    let breakSwitch = false
+    for(let row = 0; row < rows; row++){
+        if(breakSwitch === true){ break }
+        for(let col = 0; col < cols; col++){
+            if(startNode && endNode){
+                breakSwitch = true
+                break
+            }
+            if(grid[row][col].type === gridTypes.START){
+                startNode = grid[row][col]
+            } else if(grid[row][col].type === gridTypes.END){
+                endNode = grid[row][col]
+            }
+        }
+    }
+    return [startNode, endNode]
 }

@@ -24,10 +24,10 @@
             width: 90%;
             height: 100%;
         }
-        #btnStart{
+        .btn{
             color: white;
             font-size: 1.3em;
-            padding: 1em;
+            padding: 0.5em;
             font-weight: 600;
             background-color: black;
             border: none;
@@ -39,12 +39,31 @@
             transition-timing-function: ease;
             transition-duration: 0.1s;
         }
-        #btnStart:hover{
+        .btn:hover{
             background-color:#0077CC;
         }
         .manual{
             font-weight: 600;
             padding: 1em;
+            padding-left: 2em;
+        }
+        .spanStart{
+            color: #C30103;
+        }
+        .spanEnd{
+            color: #0077CC;
+        }
+        .interfaces{
+            font-weight: 600;
+            padding: 1em;
+            display: flex;
+            flex-direction: column;
+        }
+        .interfaces > *{
+            margin: 0.5em 0;
+        }
+        .slider{
+            width: 100%;
         }
     </style>
 </head>
@@ -52,14 +71,17 @@
     <div class="main">
         <canvas id="myCanvas"></canvas>
         <div>
-            <div class="manual">
-                시작점(빨강)<br/>
-                도착점(파랑)<br/>
-                1) 시작 도착 지점 각각 클릭해서 원하는 위치로 옮김<br/>
-                2) 마우스좌클릭(벽생성) 마우스우클릭(벽삭제)<br/>
-                3) 서치버튼 클릭
+            <ol class="manual">
+                <li><span class="spanStart">시작■</span> <span class="spanEnd">도착■</span> 지점 클릭후 원하는 위치로 이동</li>
+                <li>좌클릭 : 벽 생성<br/>우클릭 : 벽 삭제</li>
+                <li>Start클릭</li>
+            </ol>
+            <div class="interfaces">
+                <div>결과 즉시보기 <input id="myCheckBox" type="checkbox"/></div>
+                <button class="btn" id="btnStart">START</button>
+                <button class="btn" id="btnReset">RESET</button>
+                <div>SPEED <input type="range" min="0" max="200" value="200" class="slider" id="myRange"></div>
             </div>
-            <button id="btnStart">Search</button>
         </div>
     </div>
     <script src="index.js"></script>
