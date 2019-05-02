@@ -104,6 +104,10 @@ document.addEventListener("mouseup", (e) => {
     if(e.which === mouseEventTypes.LEFT){
         mouseLeftPressed = false
     }
+    if(e.which === mouseEventTypes.RIGHT){
+        // right click
+        mouseRightPressed = false
+    }
 })
 
 document.getElementById("btnStart").addEventListener("click", () => {
