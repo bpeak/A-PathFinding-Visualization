@@ -33,9 +33,11 @@ let grid
 let speed
 let immediateView
 let restartSwitch = false
+let isReStart
 
 function init(){
-    mouseIn = false
+    isReStart = false
+    mouseIn = true
     mouseLeftPressed = false
     mouseRightPressed = false
     mouseX = 1
@@ -49,26 +51,18 @@ function init(){
 
 init()
 
-grid[14][4].type = gridTypes.START
+grid[14][5].type = gridTypes.START
 grid[14][24].type = gridTypes.END
 
 document.getElementById("btnReset").addEventListener("click", () => {
+    document.getElementById("btnStart").innerHTML = "START"
+    isReStart = false
     restartSwitch = true
     setTimeout(() => {
         restartSwitch = false
         resetGrid()
     }, 100)
 })
-
-// document.getElementById("btnRestart").addEventListener("click", (e) => {
-//     restartSwitch = true
-//     recoverGrid()
-//     setTimeout(() => {
-//         restartSwitch = false
-//         solution()
-//     }, 100)
-
-// })
 
 document.getElementById("myCheckBox").addEventListener("input", (e) => {
     immediateView = e.currentTarget.checked
@@ -113,8 +107,14 @@ document.addEventListener("mouseup", (e) => {
 })
 
 document.getElementById("btnStart").addEventListener("click", () => {
-    console.log(solution, '실행한다')
-    solution()
+    if(isReStart === true){
+        recoverGrid()
+        solution()
+    } else {
+        isReStart = true
+        document.getElementById("btnStart").innerHTML = "RESTART"
+        solution()
+    }
 })
 
 function draw(){
@@ -145,7 +145,7 @@ function draw(){
                 ctx.fillStyle = "#FFD300"
             }
             ctx.fillRect(col * oneWidth, row * oneHeight, oneWidth, oneHeight)
-            if(grid[row][col].type !== gridTypes.WALL){
+            if(grid[row][col].type !== gridTypes.WALL && grid[row][col].isVisited === true){
                 ctx.fillStyle = "black"
                 ctx.font = oneWidth/5 + "px Arial"
                 ctx.fillText(grid[row][col].g, + 3 +  col * oneWidth, row * oneHeight + oneWidth/5)
@@ -261,7 +261,7 @@ loop()
 async function solution(){
     const [startNode, endNode] = findStartAndEndNode()
     const openList = [startNode]
-    for(let i = 0; true; i++){
+    while(true){
         if(restartSwitch === true){ break }
         if(immediateView === false){ await timer() }
         
@@ -328,7 +328,7 @@ async function solution(){
                     node.isVisited = true
                 }
             }
-        })
+        })        
     }
 }
 
@@ -486,6 +486,7 @@ function findAdjacentNodes(currentNode){
 function timer(){
     const delay = 200 - speed
     return new Promise((resolve) => {
+        console.log(delay)
         setTimeout(() => {
             resolve()
         }, delay)
@@ -501,9 +502,9 @@ function Node({
     this.type = type
     this.row = row
     this.col = col
-    this.g = 0
-    this.h = 0
-    this.f = 0
+    this.g = null
+    this.h = null
+    this.f = null
     this.index = index
     this.isVisited = false
     this.isClosed = false
