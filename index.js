@@ -86,7 +86,7 @@ canvas.addEventListener("mouseleave", () => {
 })
 
 document.oncontextmenu = (e) => {
-    // e.preventDefault()
+    e.preventDefault()
 }
 
 document.addEventListener("mousedown", (e) => {
